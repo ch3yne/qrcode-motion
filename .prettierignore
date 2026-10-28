@@ -1,0 +1,8 @@
+dist
+demo-dist
+coverage
+node_modules
+package-lock.json
+preview.png
+preview.gif
+AGENTS.md

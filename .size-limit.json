@@ -1,0 +1,14 @@
+[
+  {
+    "name": "react esm",
+    "path": "dist/react/index.js",
+    "limit": "11.8 kB",
+    "gzip": true
+  },
+  {
+    "name": "react cjs",
+    "path": "dist/react/index.cjs",
+    "limit": "12.7 kB",
+    "gzip": true
+  }
+]

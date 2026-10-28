@@ -1,0 +1,24 @@
+name: Feature request
+description: Propose a prop, a rendering option or another capability
+title: "[feat]: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    attributes:
+      label: Problem to solve
+      description: The situation the current API cannot express, and why a workaround is not enough
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Expected behaviour
+      description: The prop or behaviour you would call, with the shapes it accepts
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Alternatives considered
+      description: Optional. Other APIs, wrappers or external libraries you tried
+    validations:
+      required: false

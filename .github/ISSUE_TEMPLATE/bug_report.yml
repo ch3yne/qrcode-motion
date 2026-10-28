@@ -1,0 +1,61 @@
+name: Bug report
+description: Report a defect in the animation, the rendering or the packaged types
+title: "[bug]: "
+labels:
+  - bug
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Package version
+      description: The installed version of qrcode-motion, as printed by the npm registry or package-lock.json
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating system and browser
+      description: Where the problem shows up
+      placeholder: macOS 15.6, Safari 19
+    validations:
+      required: true
+  - type: input
+    id: node
+    attributes:
+      label: Node version
+      description: The output of node -v; the package rejects anything below 26
+      placeholder: v26.12.1
+    validations:
+      required: true
+  - type: input
+    id: react
+    attributes:
+      label: React version
+      description: The installed react version, including the resolved peer range
+      placeholder: 19.3.1
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Steps to reproduce
+      description: The smallest render that still shows the problem, plus what you clicked or waited for
+      placeholder: |
+        1. Render <QrMotion value="https://example.com" />
+        2. Wait for the fall-back frame
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Actual and expected behaviour
+      description: What happened, and what you expected instead
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Props in use
+      description: Optional. Anything beyond the defaults, for example centerLogo, logoSize or respectReducedMotion
+      placeholder: respectReducedMotion={false}
+    validations:
+      required: false

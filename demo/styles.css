@@ -1,0 +1,75 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: #0e1013;
+  -webkit-font-smoothing: antialiased;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC",
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  background: radial-gradient(720px 520px at 50% 42%, #191d22, #0e1013 70%);
+}
+
+.tile {
+  display: block;
+  padding: 0;
+  border: none;
+  border-radius: 28px;
+  background: #fff;
+  overflow: hidden;
+  cursor: pointer;
+  line-height: 0;
+  box-shadow:
+    0 40px 90px -44px rgba(0, 0, 0, 0.95),
+    0 2px 0 rgba(255, 255, 255, 0.05);
+  transition:
+    transform 0.2s cubic-bezier(0.2, 0.9, 0.3, 1.2),
+    box-shadow 0.25s ease;
+}
+
+.tile:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 48px 100px -44px rgba(0, 0, 0, 0.95),
+    0 2px 0 rgba(255, 255, 255, 0.06);
+}
+
+.tile:active {
+  transform: translateY(0) scale(0.995);
+}
+
+.tile:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.35);
+  outline-offset: 6px;
+}
+
+.tile canvas {
+  display: block;
+}
+
+@media (max-width: 560px) {
+  .page {
+    padding: 24px 16px;
+  }
+  .tile {
+    width: 88vw;
+    height: 88vw;
+    border-radius: 24px;
+  }
+  .tile canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+}
