@@ -49,13 +49,13 @@ Run `npm run check`. It is a six-step chain — typecheck, format check, lint, t
 
 ## Code style
 
-Lint comes from the flat config in `eslint.config.mjs`: typescript-eslint recommended for `src/**`, plus `react-hooks/rules-of-hooks` as an error and `react-hooks/exhaustive-deps` as a warning. Layout comes from Prettier. The same config carries the local `local/english-comments` rule described under Comments.
+Lint comes from the flat config in `eslint.config.mjs`: typescript-eslint recommended for `src/**`, plus `react-hooks/rules-of-hooks` as an error and `react-hooks/exhaustive-deps` as a warning. Layout comes from Prettier.
 
 No inline suppressions. Do not write `eslint-disable` comments: if a rule has to be relaxed, change the config and explain why in the commit message.
 
 ## Comments
 
-Comments, test names, script output and diagnostics are written in English; Chinese stays for the translated documents (`README.zh-CN.md`, `CHANGELOG.zh-CN.md`, `CONTRIBUTING.zh-CN.md`, `SECURITY.zh-CN.md`) and for demo UI copy. The `local/english-comments` rule fails any comment that contains non-Latin characters.
+Comments, test names, script output and diagnostics are written in English; Chinese stays for the translated documents (`README.zh-CN.md`, `CHANGELOG.zh-CN.md`, `CONTRIBUTING.zh-CN.md`, `SECURITY.zh-CN.md`) and for demo UI copy. This is a review convention, not a lint rule: `npm run check` does not verify the language.
 
 A comment explains why — why this computation, why this order — never what the next line does. When behavior changes, the comment changes with it.
 
