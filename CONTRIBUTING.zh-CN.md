@@ -49,13 +49,13 @@
 
 ## 代码风格
 
-静态检查来自 `eslint.config.mjs` 的 flat config：`src/**` 用 typescript-eslint recommended，另外 `react-hooks/rules-of-hooks` 为 error、`react-hooks/exhaustive-deps` 为 warn。排版来自 Prettier。同一份配置里的 `local/english-comments` 规则见「注释」一节。
+静态检查来自 `eslint.config.mjs` 的 flat config：`src/**` 用 typescript-eslint recommended，另外 `react-hooks/rules-of-hooks` 为 error、`react-hooks/exhaustive-deps` 为 warn。排版来自 Prettier。
 
 不做行内豁免。不要写 `eslint-disable` 注释：需要放宽某条规则就改配置，并在提交信息里说清理由。
 
 ## 注释
 
-注释、测试名、脚本输出与诊断信息一律用英文；中文留给翻译文档（`README.zh-CN.md`、`CHANGELOG.zh-CN.md`、`CONTRIBUTING.zh-CN.md`、`SECURITY.zh-CN.md`）与演示页界面文案。`local/english-comments` 规则会让含非拉丁字符的注释直接 lint 失败。
+注释、测试名、脚本输出与诊断信息一律用英文；中文留给翻译文档（`README.zh-CN.md`、`CHANGELOG.zh-CN.md`、`CONTRIBUTING.zh-CN.md`、`SECURITY.zh-CN.md`）与演示页界面文案。这是评审约定而非 lint 规则：`npm run check` 不检查语言。
 
 注释只解释为什么——为什么这样算、为什么必须这个顺序——不复述下一行做了什么。行为变了，注释跟着一起改。
 

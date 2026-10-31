@@ -24,28 +24,6 @@ const reactRules = {
   "react-hooks/exhaustive-deps": "warn",
 };
 
-/* Local rule, no dependency behind it: comment text must be English. See CONTRIBUTING.md. */
-const nonLatinText = /[\u3000-\u303F\u3400-\u4DBF\u4E00-\u9FFF\uFF00-\uFFEF]/;
-const englishComments = {
-  meta: {
-    type: "suggestion",
-    docs: { description: "Require English comment text." },
-    schema: [],
-    messages: { notEnglish: "Comments must be written in English." },
-  },
-  create(context) {
-    return {
-      Program() {
-        for (const comment of context.sourceCode.getAllComments()) {
-          if (nonLatinText.test(comment.value)) {
-            context.report({ loc: comment.loc, messageId: "notEnglish" });
-          }
-        }
-      },
-    };
-  },
-};
-
 export default [
   {
     ignores: [
@@ -77,11 +55,6 @@ export default [
         tsconfigRootDir: import.meta.dirname,
       },
     },
-  },
-  {
-    files: allSources,
-    plugins: { local: { rules: { "english-comments": englishComments } } },
-    rules: { "local/english-comments": "error" },
   },
   {
     files: typedSources,

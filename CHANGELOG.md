@@ -2,7 +2,7 @@
 
 ### Changed
 
-- Code comments, test names and build script output are English now, and the published type declarations carry English JSDoc. The `local/english-comments` lint rule enforces the language.
+- Code comments, test names and build script output are English now, and the published type declarations carry English JSDoc.
 - Release notes come from the version section of this changelog, so `.github/release.yml` is removed.
 
 ## [0.1.1] - 2026-10-31
