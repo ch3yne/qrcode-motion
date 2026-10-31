@@ -4,7 +4,7 @@ export type EcLevel = "L" | "M" | "Q" | "H";
 
 export interface Matrix {
   size: number;
-  /** 行优先的 0/1 矩阵，长度 size * size */
+  /** Row-major 0/1 matrix, length size * size */
   cells: Uint8Array;
 }
 

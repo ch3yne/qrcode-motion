@@ -49,13 +49,17 @@ Run `npm run check`. It is a six-step chain — typecheck, format check, lint, t
 
 ## Code style
 
-Lint comes from the flat config in `eslint.config.mjs`: typescript-eslint recommended for `src/**`, plus `react-hooks/rules-of-hooks` as an error and `react-hooks/exhaustive-deps` as a warning. Layout comes from Prettier.
+Lint comes from the flat config in `eslint.config.mjs`: typescript-eslint recommended for `src/**`, plus `react-hooks/rules-of-hooks` as an error and `react-hooks/exhaustive-deps` as a warning. Layout comes from Prettier. The same config carries the local `local/english-comments` rule described under Comments.
 
 No inline suppressions. Do not write `eslint-disable` comments: if a rule has to be relaxed, change the config and explain why in the commit message.
 
 ## Comments
 
-Comments are written in Chinese and explain why — why this computation, why this order — never what the next line does. When behavior changes, the comment changes with it.
+Comments, test names, script output and diagnostics are written in English; Chinese stays for the translated documents (`README.zh-CN.md`, `CHANGELOG.zh-CN.md`, `CONTRIBUTING.zh-CN.md`, `SECURITY.zh-CN.md`) and for demo UI copy. The `local/english-comments` rule fails any comment that contains non-Latin characters.
+
+A comment explains why — why this computation, why this order — never what the next line does. When behavior changes, the comment changes with it.
+
+Keep it plain and factual. Avoid the shapes that make prose read as machine-written: openers such as "Note that", "It's worth noting", "In other words", "Essentially"; an em dash used as a narrative pause; exclamation marks; emoji; adjectives such as elegant, robust, seamless or powerful; the "not X but Y" pivot; a closing summary sentence; three-part lists added for rhythm.
 
 ## Documentation
 
@@ -76,6 +80,7 @@ All fourteen CI steps must be green before a pull request can merge. Do not comm
 3. Push the commit and the tag. A `v*` tag triggers `.github/workflows/release.yml`, which reruns the gate chain on the runner and then runs `npm publish --provenance --access public`.
 4. Publishing authenticates through npm trusted publishing: the workflow requests an OIDC token (`id-token: write`) and npm exchanges it for short-lived credentials. The repository stores no long-lived token. Do not publish from a local machine.
 5. Never overwrite a published version. Deprecate a bad release with `npm deprecate` and publish a patch version.
+6. Release notes are the version section of `CHANGELOG.md`. The repository keeps no `.github/release.yml`, and GitHub's generated notes are not used.
 
 ## What we do not accept
 

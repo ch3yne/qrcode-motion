@@ -4,8 +4,8 @@ updates:
     directory: /
     schedule:
       interval: weekly
-    # react 与它的类型包固定在 react-floor job 需要的 18/19 基线，大版本升级必须人工决定；
-    # 只挡 major，minor 与 patch 照常进，安全补丁才收得到
+    # react and its type packages stay on the 18/19 baseline the react-floor job needs, so a major bump is a manual decision;
+    # only major is blocked, minor and patch still land so security fixes get through
     ignore:
       - dependency-name: react
         update-types:
@@ -19,12 +19,12 @@ updates:
       - dependency-name: "@types/react-dom"
         update-types:
           - version-update:semver-major
-      # typescript 的大版本要等 typescript-eslint 放开 peer 上限（当前 >=4.8.4 <6.1.0），
-      # 否则升级 PR 一律在 npm ci 阶段 ERESOLVE 失败；同样只挡 major
+      # a typescript major has to wait for typescript-eslint to widen its peer range (currently >=4.8.4 <6.1.0),
+      # otherwise the upgrade PR fails with ERESOLVE during npm ci; major is blocked here too
       - dependency-name: typescript
         update-types:
           - version-update:semver-major
-    # 开发依赖聚成一组，避免每周刷出一批单独 PR
+    # dev dependencies grouped so a week's updates arrive as one PR
     groups:
       development-dependencies:
         dependency-type: development

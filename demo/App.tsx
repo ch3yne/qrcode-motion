@@ -2,13 +2,12 @@ import { useCallback, useEffect, useState } from "react";
 import { QrMotion } from "../src/react";
 import avatar from "./assets/avatar.png";
 
-/** 二维码内容：改这一行就行 */
+/** QR payload. Change this line to change the code content. */
 const DEFAULT_PAYLOAD = "https://example.com";
 
 /**
- * 调试用：`?bytes=120` 生成指定字节数的内容。
- * 内容长度决定模块数（7 字节 → 21×21，700 字节 → 137×137），
- * 用它逐档检查不同密度下的观感与可扫性。
+ * Debug helper: `?bytes=120` builds a payload of that many bytes.
+ * Length sets the module count: 7 bytes -> 21x21, 700 bytes -> 137x137.
  */
 function resolvePayload(): string {
   const raw = new URLSearchParams(window.location.search).get("bytes");
@@ -19,9 +18,9 @@ function resolvePayload(): string {
 }
 
 const QR_PAYLOAD = resolvePayload();
-/** 纠错等级：有中心 logo 用 H，留足冗余 */
+/** ECC level: H leaves enough redundancy to survive the centered logo. */
 const QR_ECC = "H";
-/** 码面尺寸（px） */
+/** Rendered size in px. */
 const QR_SIZE = 480;
 
 export default function App() {

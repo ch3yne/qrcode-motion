@@ -3,6 +3,6 @@ import App from "./App";
 import "./styles.css";
 
 const container = document.getElementById("root");
-if (!container) throw new Error("index.html 缺少 #root 挂载点");
+if (!container) throw new Error("index.html is missing the #root mount point");
 
 createRoot(container).render(<App />);

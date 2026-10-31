@@ -13,66 +13,66 @@ import {
 import { QrCanvas } from "./QrCanvas";
 import { prefersReducedMotion } from "./motion";
 
-/** 中心 logo：图片地址、已加载的 Image，或 null（不挖空） */
+/** Centre logo: an image URL, a loaded Image, or null for no cut-out */
 export type LogoSource = string | HTMLImageElement | null;
 
 export interface QrMotionProps {
-  /** 二维码内容 */
+  /** QR payload */
   value: string;
-  /** 纠错等级，默认 M；加中心 logo 建议 H */
+  /** Error correction level, default M; H is advised together with a centre logo */
   ecc?: EcLevel;
-  /** 码面边长（px），默认 320 */
+  /** Symbol edge length in px, default 320 */
   size?: number;
 
-  /** 中心 logo，不传则不挖空 */
+  /** Centre logo; omit it to draw no cut-out */
   logo?: LogoSource;
-  /** 显式指定 logo 宽高比（宽/高），图片未加载时也能预留位置 */
+  /** Explicit logo aspect ratio (width / height), so space can be reserved before the image loads */
   logoRatio?: number;
-  /** 设为 false 彻底关闭中心挖空 */
+  /** Set to false to turn the centre cut-out off */
   hole?: Partial<HoleStyle> | false;
 
-  /** 是否播放“字符瀑布 → 凝成二维码”，默认 true */
+  /** Whether to play the character rain settling into the code, default true */
   animated?: boolean;
-  /** 默认 true：系统偏好减弱动态效果时直接呈现落定态；传 false 保持纯 animated 语义 */
+  /** Default true: renders the settled frame when the system prefers reduced motion; false keeps the plain animated behaviour */
   respectReducedMotion?: boolean;
-  /** 动画速度倍数，默认 1 */
+  /** Animation speed multiplier, default 1 */
   speed?: number;
-  /** 凝固方向：由中心向外（默认）或自上而下 */
+  /** Settle direction: centre outwards (default) or top down */
   sweep?: "radial" | "down";
-  /** mono 纯黑白；aurora 成形后叠加色波，默认 mono */
+  /** mono is plain black on white; aurora adds a colour wave after the settle, default mono */
   tint?: "mono" | "aurora";
 
-  /** 模块颜色，默认 #0f1115 */
+  /** Module colour, default #0f1115 */
   ink?: string;
-  /** 码面与挖空底色，默认 #ffffff */
+  /** Canvas and cut-out background, default #ffffff */
   paper?: string;
-  /** aurora 色波颜色，默认 #1f9bd4 */
+  /** Aurora wave colour, default #1f9bd4 */
   accent?: string;
-  /** 静区模块数，默认 4 */
+  /** Quiet zone width in modules, default 4 */
   quiet?: number;
-  /** 模块边长占格宽比例，默认 0.955 */
+  /** Module edge length as a fraction of the cell width, default 0.955 */
   moduleScale?: number;
-  /** 模块圆角（格），默认 0.29 */
+  /** Module corner radius in cells, default 0.29 */
   moduleRadius?: number;
 
-  /** 变化时重播整段动画 */
+  /** Replays the whole animation when it changes */
   replayKey?: string | number;
 
   className?: string;
   style?: CSSProperties;
   ariaLabel?: string;
-  /** 动画结束（或静态渲染完成）时回调 */
+  /** Called when the animation settles, or when the static frame is done */
   onSettle?: () => void;
-  /** 内容非法或 logo 加载失败时回调 */
+  /** Called when the payload is invalid or the logo fails to load */
   onError?: (error: Error) => void;
 }
 
 const ERR = {
-  value: "QrMotion: `value` 不能为空",
-  logo: "QrMotion: logo 加载失败，已回退为无 logo 的二维码",
+  value: "QrMotion: `value` must not be empty",
+  logo: "QrMotion: logo failed to load, falling back to a code without a logo",
 };
 
-/** 加载 logo；字符串走 Image，Image 实例直接用，null 表示关闭 */
+/** Loads the logo: strings go through Image, an Image instance is used as is, null turns it off */
 function useLogo(source: LogoSource | undefined, onError?: (e: Error) => void) {
   const [image, setImage] = useState<HTMLImageElement | null>(null);
   const current = useRef<string | null>(null);
@@ -92,7 +92,7 @@ function useLogo(source: LogoSource | undefined, onError?: (e: Error) => void) {
     }
     if (typeof window === "undefined") return;
 
-    /* 同一地址不重复加载，避免父组件重渲染时闪一下 */
+    /* Skip reloading the same URL, which would flash on every parent re-render */
     if (current.current === source) return;
     current.current = source;
 
@@ -175,16 +175,16 @@ export function QrMotion(props: QrMotionProps) {
 
   const [reducedMotion, setReducedMotion] = useState(false);
 
-  /* matchMedia 只在 effect 里读：render 期不碰 window，服务端渲染才不会取不到对象 */
+  /* matchMedia is read in an effect only; touching window during render breaks server rendering */
   useEffect(() => {
     if (!respectReducedMotion || typeof window === "undefined") return;
 
-    /* matchMedia 是 window 的方法，脱离 window 调用会非法调用，先绑定 */
+    /* matchMedia is a window method and throws when called detached, so bind it first */
     const matchMedia = window.matchMedia.bind(window);
     setReducedMotion(prefersReducedMotion(matchMedia));
   }, [respectReducedMotion]);
 
-  /* 内容或纠错等级变了就重建矩阵；出错时退化为空矩阵，不抛到渲染树 */
+  /* Rebuild the matrix when the payload or level changes; failures return null rather than reaching the render tree */
   const matrix = useMemo<Matrix | null>(() => {
     if (!value) {
       onErrorRef.current?.(new Error(ERR.value));
@@ -234,10 +234,10 @@ export function QrMotion(props: QrMotionProps) {
         ? image.naturalWidth / image.naturalHeight
         : 1;
 
-  /* 只有 respectReducedMotion 为 true 时才可能改写，为 false 时恒为 false，动画路径不变 */
+  /* Only respectReducedMotion can set this; with it false the animation path is untouched */
   const still = respectReducedMotion && reducedMotion;
 
-  /* 没有 logo 时不挖空，避免出现一块空白洞 */
+  /* No logo means no cut-out, which would otherwise leave an empty hole */
   const options = useMemo<RenderOptions | null>(
     () =>
       matrix

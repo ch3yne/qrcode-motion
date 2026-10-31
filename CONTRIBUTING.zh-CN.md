@@ -49,13 +49,17 @@
 
 ## 代码风格
 
-静态检查来自 `eslint.config.mjs` 的 flat config：`src/**` 用 typescript-eslint recommended，另外 `react-hooks/rules-of-hooks` 为 error、`react-hooks/exhaustive-deps` 为 warn。排版来自 Prettier。
+静态检查来自 `eslint.config.mjs` 的 flat config：`src/**` 用 typescript-eslint recommended，另外 `react-hooks/rules-of-hooks` 为 error、`react-hooks/exhaustive-deps` 为 warn。排版来自 Prettier。同一份配置里的 `local/english-comments` 规则见「注释」一节。
 
 不做行内豁免。不要写 `eslint-disable` 注释：需要放宽某条规则就改配置，并在提交信息里说清理由。
 
 ## 注释
 
-注释用中文，只解释为什么——为什么这样算、为什么必须这个顺序——不复述下一行做了什么。行为变了，注释跟着一起改。
+注释、测试名、脚本输出与诊断信息一律用英文；中文留给翻译文档（`README.zh-CN.md`、`CHANGELOG.zh-CN.md`、`CONTRIBUTING.zh-CN.md`、`SECURITY.zh-CN.md`）与演示页界面文案。`local/english-comments` 规则会让含非拉丁字符的注释直接 lint 失败。
+
+注释只解释为什么——为什么这样算、为什么必须这个顺序——不复述下一行做了什么。行为变了，注释跟着一起改。
+
+写法要平实、只写事实。避免机器味特征：`Note that`、`It's worth noting`、`In other words`、`Essentially` 这类铺垫；用破折号当叙事停顿；感叹号与 emoji；`elegant`、`robust`、`seamless`、`powerful` 这类空形容词；「不是 X，而是 Y」式转折；段末总结句；只为对仗凑出的三段排比。
 
 ## 文档
 
@@ -76,6 +80,7 @@ CI 十四条步骤全绿才可合并。不提交 `dist/`、`demo-dist/`、`node_
 3. 推送提交与 tag；`v*` tag 触发 `.github/workflows/release.yml`，在运行器上重跑门禁链后执行 `npm publish --provenance --access public`。
 4. 发布认证走 npm trusted publishing：工作流申请 OIDC 令牌（`id-token: write`），由 npm 换成短时凭据，仓内不存放长效令牌；不要在本机直接发布。
 5. 已发布版本不覆写；发错了用 `npm deprecate` 标记，再发补丁版本。
+6. 发布说明取自 `CHANGELOG.md` 的对应版本段落；仓内不配置 `.github/release.yml`，也不用 GitHub 自动生成的 notes。
 
 ## 我们不接受的做法
 

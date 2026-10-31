@@ -1,7 +1,6 @@
 /**
- * 把 tsc 产出的逐文件声明打平成单文件 dist/react/index.d.ts。
- * 逐文件声明里的相对导入不带扩展名，在 node16 解析下会失败，
- * 打平后只剩一个文件，任何解析模式都能正常工作。
+ * Flattens the per-file declarations from tsc into one dist/react/index.d.ts. Those files
+ * import each other extensionless, which node16 resolution rejects; a single file resolves nothing.
  */
 import { rollup } from "rollup";
 import dts from "rollup-plugin-dts";
@@ -14,4 +13,4 @@ const bundle = await rollup({
 await bundle.write({ file: "dist/react/index.d.ts", format: "es" });
 await bundle.close();
 rmSync(".dts-tmp", { recursive: true, force: true });
-console.log("✓ dist/react/index.d.ts（已打平）");
+console.log("✓ dist/react/index.d.ts (flattened)");
