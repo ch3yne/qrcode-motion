@@ -67,14 +67,14 @@
 
 ## 拉取请求
 
-CI 十条步骤全绿才可合并。不提交 `dist/`、`demo-dist/`、`node_modules/`。
+CI 十四条步骤全绿才可合并。不提交 `dist/`、`demo-dist/`、`node_modules/`。
 
 ## 发布
 
 1. 把 `CHANGELOG.md` 与 `CHANGELOG.zh-CN.md` 的 `[Unreleased]` 落成新版本条目，同一提交内改 `package.json` 的 `version`，再跑 `npm run check`。
 2. 本地打 annotated tag：`git tag -a v<version> -m "qrcode-motion <version>"`。
 3. 推送提交与 tag；`v*` tag 触发 `.github/workflows/release.yml`，在运行器上重跑门禁链后执行 `npm publish --provenance --access public`。
-4. 发布令牌取自仓库 secret `NPM_TOKEN`，不要在本机直接发布。
+4. 发布认证走 npm trusted publishing：工作流申请 OIDC 令牌（`id-token: write`），由 npm 换成短时凭据，仓内不存放长效令牌；不要在本机直接发布。
 5. 已发布版本不覆写；发错了用 `npm deprecate` 标记，再发补丁版本。
 
 ## 我们不接受的做法

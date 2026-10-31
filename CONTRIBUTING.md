@@ -67,14 +67,14 @@ Use Conventional Commits: `feat`, `fix`, `docs`, `style`, `chore`, `test`, `refa
 
 ## Pull requests
 
-All ten CI steps must be green before a pull request can merge. Do not commit `dist/`, `demo-dist/` or `node_modules/`.
+All fourteen CI steps must be green before a pull request can merge. Do not commit `dist/`, `demo-dist/` or `node_modules/`.
 
 ## Releasing
 
 1. Replace `[Unreleased]` in `CHANGELOG.md` and `CHANGELOG.zh-CN.md` with a new version entry, set the same version in `package.json`, and run `npm run check` — all in one commit.
 2. Tag it locally with `git tag -a v<version> -m "qrcode-motion <version>"`.
 3. Push the commit and the tag. A `v*` tag triggers `.github/workflows/release.yml`, which reruns the gate chain on the runner and then runs `npm publish --provenance --access public`.
-4. The publish token comes from the repository secret `NPM_TOKEN`. Do not publish from a local machine.
+4. Publishing authenticates through npm trusted publishing: the workflow requests an OIDC token (`id-token: write`) and npm exchanges it for short-lived credentials. The repository stores no long-lived token. Do not publish from a local machine.
 5. Never overwrite a published version. Deprecate a bad release with `npm deprecate` and publish a patch version.
 
 ## What we do not accept
