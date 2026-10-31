@@ -1,6 +1,6 @@
 {
   "name": "qrcode-motion",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Animated QR code for React: cascading characters resolve into a scannable code, with an optional center logo.",
   "keywords": [
     "qrcode",
