@@ -19,6 +19,11 @@ updates:
       - dependency-name: "@types/react-dom"
         update-types:
           - version-update:semver-major
+      # typescript 的大版本要等 typescript-eslint 放开 peer 上限（当前 >=4.8.4 <6.1.0），
+      # 否则升级 PR 一律在 npm ci 阶段 ERESOLVE 失败；同样只挡 major
+      - dependency-name: typescript
+        update-types:
+          - version-update:semver-major
     # 开发依赖聚成一组，避免每周刷出一批单独 PR
     groups:
       development-dependencies:
