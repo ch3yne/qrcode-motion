@@ -60,6 +60,5 @@ jobs:
           fi
 
       - name: Publish to npm
+        # 认证走 npm trusted publishing：由 id-token 换短时凭据，工作流不注入长效令牌
         run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
