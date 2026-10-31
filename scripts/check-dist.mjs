@@ -1,6 +1,6 @@
 /**
- * 产物自检：源码正确不代表发出去的包正确，这里只检查 dist。
- * 任何一条不过就以非零码退出，避免把坏包发出去。
+ * Artifact self-check: correct source does not mean a correct published package, so only dist is
+ * inspected here. Any failing check exits non-zero to keep a broken package from shipping.
  */
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
@@ -18,56 +18,60 @@ const esm = read(ENTRY);
 read("react/index.cjs");
 const dts = read("react/index.d.ts");
 
-/* 1. "use client" 必须是 ESM 的第一条语句，否则 RSC 下整个包被判为服务端模块 */
+/* 1. "use client" must be the first ESM statement, or RSC treats the whole package as a server module */
 check(
   /^["']use client["'];/.test(esm.trimStart()),
-  'ESM 首条语句是 "use client"',
-  'ESM 缺少 "use client" 指令（Rollup 会剥掉它，需要 banner 兜住）',
+  'ESM starts with the "use client" directive',
+  'ESM is missing the "use client" directive (Rollup strips it, so the banner has to restore it)',
 );
 
-/* 2. 不能内联 React 或 jsx-runtime */
+/* 2. React and jsx-runtime must not be inlined */
 check(
   !/process\.env/.test(esm),
-  "产物中没有 process.env",
-  "产物中残留 process.env，说明内联了开发版 React",
+  "no process.env in the output",
+  "process.env left in the output, so the development React build got inlined",
 );
 check(
   /from\s*["']react\/jsx-runtime["']/.test(esm),
-  "jsx-runtime 保持外置",
-  "jsx-runtime 没有被外部引入，可能已被内联",
+  "jsx-runtime stays external",
+  "jsx-runtime is not imported from outside, so it may be inlined",
 );
 check(
   /from\s*["']qrcode-generator["']/.test(esm),
-  "qrcode-generator 保持外置",
-  "qrcode-generator 被内联，应与依赖一起外置",
+  "qrcode-generator stays external",
+  "qrcode-generator was inlined; it is a dependency and belongs outside",
 );
 check(
   !/__SECRET_INTERNALS/.test(esm) && !/react\.production\.min/.test(esm),
-  "React 本体未被内联",
-  "React 本体被内联进产物",
+  "React itself is not inlined",
+  "React itself was inlined into the output",
 );
 
-/* 3. 类型声明齐全，且导出的是新名字 */
+/* 3. Declarations are complete and export the current names */
 check(
   dts.includes("QrMotionProps"),
-  "d.ts 含 QrMotionProps",
-  "d.ts 缺少 QrMotionProps",
+  "d.ts contains QrMotionProps",
+  "d.ts is missing QrMotionProps",
 );
-check(dts.includes("LogoSource"), "d.ts 含 LogoSource", "d.ts 缺少 LogoSource");
+check(
+  dts.includes("LogoSource"),
+  "d.ts contains LogoSource",
+  "d.ts is missing LogoSource",
+);
 check(
   !/\bCreativeQr\b/.test(dts) && !/\bCreativeQr\b/.test(esm),
-  "产物中已无旧名 CreativeQr",
-  "产物里仍残留旧名 CreativeQr，改名没覆盖全",
+  "no CreativeQr left in the artifacts",
+  "CreativeQr is still in the artifacts; the rename did not cover everything",
 );
 
-/* 4. CJS 消费者也要有类型 */
+/* 4. CJS consumers need types too */
 check(
   readdirSync(join(DIST, "react")).includes("index.d.cts"),
-  "d.cts 存在（CJS 类型可用）",
-  "缺少 react/index.d.cts，require 场景拿不到类型",
+  "index.d.cts exists, so CJS types resolve",
+  "react/index.d.cts is missing; require consumers get no types",
 );
 
-/* 5. 包里不能出现个人素材（递归查，产物已按框架分目录） */
+/* 5. No personal assets in the package (recursive, since artifacts are split per framework) */
 const walk = (dir) =>
   readdirSync(dir).flatMap((f) => {
     const p = join(dir, f);
@@ -76,15 +80,15 @@ const walk = (dir) =>
 const images = walk(DIST).filter((f) => /\.(png|jpe?g|webp|gif|svg)$/i.test(f));
 check(
   images.length === 0,
-  "dist 不含任何图片素材",
-  `dist 里混进了图片：${images.map((f) => relative(DIST, f)).join(", ")}`,
+  "dist contains no image assets",
+  `images leaked into dist: ${images.map((f) => relative(DIST, f)).join(", ")}`,
 );
 
-/* 6. 目录结构要符合 exports 的承诺 */
+/* 6. Directory layout has to match what exports promises */
 check(
   readFileSync(join(DIST, "react/index.cjs"), "utf8").length > 0,
-  "产物落在 dist/react/ 下",
-  "产物路径与 package.json 的 exports 不一致",
+  "artifacts land under dist/react/",
+  "artifact paths do not match package.json exports",
 );
 
 for (const m of passes) console.log(`✓ ${m}`);

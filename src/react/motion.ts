@@ -1,8 +1,9 @@
 /**
- * 判定系统是否偏好减弱动态效果。
+ * Detects whether the system prefers reduced motion.
  *
- * 做成独立纯函数而不是在组件里内联读 window：判定只依赖传入的 matchMedia，
- * 单测可以直接喂假函数，不必为了一个布尔判定引入 jsdom 之类的 DOM 测试栈。
+ * Kept as a standalone pure function instead of reading window inside the component: the check only
+ * depends on the matchMedia passed in, so unit tests feed a fake and skip a DOM stack such as
+ * jsdom.
  */
 export function prefersReducedMotion(
   matchMedia: ((query: string) => { matches: boolean }) | undefined,

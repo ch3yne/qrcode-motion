@@ -4,7 +4,7 @@ import { drawFrame, type RenderOptions } from "../core/render";
 
 export interface QrCanvasProps {
   options: RenderOptions;
-  /** 变化时重播整段动画 */
+  /** Replays the whole animation when it changes */
   replayKey: string;
   ariaLabel: string;
   className?: string;
@@ -13,9 +13,9 @@ export interface QrCanvasProps {
 }
 
 /**
- * 只负责「把一帧帧画到 canvas 上」这一件事。
- * 绘制逻辑全在 core/render.ts，本身不依赖 React —— 将来加 Vue / vanilla 入口时，
- * 复制的是这个循环，不是绘图代码。
+ * Draws one frame at a time onto the canvas.
+ * All drawing lives in core/render.ts and is framework-agnostic, so a future Vue or vanilla entry
+ * copies this loop and reuses the drawing code.
  */
 export function QrCanvas({
   options,
@@ -49,7 +49,7 @@ export function QrCanvas({
 
       const settled = !o.animated || now - born > settleAt;
 
-      /* 静止且无色波时不必按帧重绘，4fps 足够，省电 */
+      /* Settled and without the wave nothing changes per frame, so 4fps saves power */
       if (settled && o.tint === "mono" && now - lastDraw < 0.25) {
         raf = requestAnimationFrame(loop);
         return;

@@ -60,5 +60,5 @@ jobs:
           fi
 
       - name: Publish to npm
-        # 认证走 npm trusted publishing：由 id-token 换短时凭据，工作流不注入长效令牌
+        # npm trusted publishing: the id-token grant is exchanged for a short-lived credential, no long-lived token is injected here
         run: npm publish --provenance --access public

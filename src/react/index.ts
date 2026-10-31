@@ -1,8 +1,9 @@
 /**
- * qrcode-motion/react —— React 入口。
+ * qrcode-motion/react: the React entry point.
  *
- * 组件本身不含任何品牌素材：中心 logo 由使用方通过 `logo` 传入。
- * 绘图代码在 ../core/render.ts，与框架无关，将来新增 Vue / vanilla 入口时复用同一份。
+ * The component ships no brand assets; the centre logo is passed in through `logo`.
+ * Drawing code lives in ../core/render.ts and is framework-agnostic, so a future Vue or vanilla
+ * entry reuses the same implementation.
  */
 export { QrMotion } from "./QrMotion";
 export type { QrMotionProps, LogoSource } from "./QrMotion";

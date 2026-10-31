@@ -1,6 +1,6 @@
 /**
- * 双格式的类型声明：CJS 消费者要走 .d.cts，否则 TS 在 require 场景下解析不到类型。
- * 两份声明内容一致，直接复制。
+ * Types for both module formats: CJS consumers resolve .d.cts, and without it TypeScript finds
+ * no types under require. Both declarations are identical, so this copies one to the other.
  */
 import { copyFileSync } from "node:fs";
 

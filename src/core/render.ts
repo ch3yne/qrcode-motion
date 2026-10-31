@@ -1,43 +1,43 @@
 import type { Matrix } from "./matrix";
 
-/** 配色与模块形状 */
+/** Colours and module shape */
 export interface QrStyle {
-  /** 模块颜色 */
+  /** Module colour */
   ink: string;
-  /** 码面底色（也是挖空区的颜色） */
+  /** Canvas background, also the cut-out colour */
   paper: string;
-  /** `tint="aurora"` 时的色波动画色 */
+  /** Wave colour when `tint="aurora"` */
   accent: string;
-  /** 模块边长相对格宽的占比，0–1，默认 0.955 */
+  /** Module edge length as a fraction of the cell width, 0-1, default 0.955 */
   moduleScale: number;
-  /** 模块圆角，单位为格，默认 0.29 */
+  /** Module corner radius in cells, default 0.29 */
   moduleRadius: number;
-  /** 静区模块数，默认 4 */
+  /** Quiet zone width in modules, default 4 */
   quiet: number;
 }
 
 /**
- * 中心挖空区。
- * `padding` / `radius` 故意用「占挖空短边的比例」而不是格数：
- * 内容一长、格子变小，按格给的留白和圆角会跟着缩水，观感就变了。
+ * Centre cut-out.
+ * `padding` and `radius` are fractions of the hole short side rather than cell counts: a longer
+ * payload shrinks the cells, and per-cell padding and radius would shrink with them.
  */
 export interface HoleStyle {
-  /** 挖空宽度占符号总格数（含静区）的比例，默认 0.2 */
+  /** Hole width as a fraction of the total module count, quiet zone included, default 0.2 */
   cols: number;
-  /** 高 / 宽，默认 1.22（竖版，配半身像） */
+  /** Height / width, default 1.22 (portrait, suits a headshot) */
   aspect: number;
-  /** logo 四周留白，占挖空短边的比例，默认 0.07 */
+  /** Padding around the logo as a fraction of the hole short side, default 0.07 */
   padding: number;
-  /** 挖空圆角，占挖空短边的比例，0–0.5，默认 0.22 */
+  /** Hole corner radius as a fraction of the hole short side, 0-0.5, default 0.22 */
   radius: number;
 }
 
 export interface Timing {
-  /** 纯瀑布阶段时长（秒） */
+  /** Duration of the rain-only phase, in seconds */
   rain: number;
-  /** 波前从起点到最远端的耗时（秒） */
+  /** Time for the wave front to travel from the origin to the farthest cell, in seconds */
   span: number;
-  /** 单格从字符变成模块的耗时（秒） */
+  /** Time for one cell to turn from a character into a module, in seconds */
   cell: number;
 }
 
@@ -63,7 +63,7 @@ export const DEFAULT_TIMING: Timing = {
   cell: 0.46,
 };
 
-/** 渲染器需要的全部参数（已解析为默认值） */
+/** Every parameter the renderer needs, defaults already resolved */
 export interface RenderOptions {
   matrix: Matrix;
   size: number;
@@ -74,40 +74,40 @@ export interface RenderOptions {
   hole: HoleStyle | null;
   timing: Timing;
   logo: CanvasImageSource | null;
-  /** logo 宽高比，用于等比放进挖空区 */
+  /** Logo aspect ratio, used to fit it into the hole without stretching */
   logoRatio: number;
 }
 
-/** 挖空区的几何（CSS px，已取整到整格） */
+/** Hole geometry in CSS px, already rounded to whole cells */
 export interface HoleMetrics {
   x: number;
   y: number;
   w: number;
   h: number;
-  /** 宽、高各占多少整格 */
+  /** Width and height in whole cells */
   cols: number;
   rows: number;
-  /** logo 四周留白（px） */
+  /** Padding around the logo in px */
   pad: number;
-  /** 圆角（px） */
+  /** Corner radius in px */
   radius: number;
 }
 
 /**
- * 由「模块数 + 画布尺寸」推导出的绘制度量。
- * 这里是唯一把格数换算成像素的地方：内容一长，格数变多、每格变窄，
- * 所有会跟着格子缩水的细节（字号、圆角、留白）都在这里兜住。
+ * Drawing metrics derived from the module count and the canvas size.
+ * The only place that converts cells into pixels: a longer payload means more, narrower cells, and
+ * every cell-relative detail (glyph font, radius, padding) is resolved here.
  */
 export interface Metrics {
-  /** 含静区的总格数 */
+  /** Total modules, quiet zone included */
   total: number;
-  /** 每格边长（px） */
+  /** Cell edge length in px */
   cell: number;
-  /** 字符层字号（px）；0 表示格子太小，改为画点 */
+  /** Glyph font size in px; 0 means the cells are too small and dots are drawn instead */
   glyphFont: number;
-  /** 模块圆角（px）；0 表示关闭圆角 */
+  /** Module corner radius in px; 0 disables rounding */
   moduleRadius: number;
-  /** 挖空区几何；没有 logo 或关闭挖空时为 null */
+  /** Hole geometry; null when there is no logo or the hole is off */
   hole: HoleMetrics | null;
 }
 
@@ -117,15 +117,15 @@ export function computeMetrics(o: RenderOptions): Metrics {
   const total = n + quiet * 2;
   const cell = o.size / total;
 
-  /* 字号压到 5px 以下，字符糊成一团、还会溢满整格，不如画点 */
+  /* Below 5px the glyphs smear together and overflow the cell, so dots read better */
   const glyphFont = cell >= 5 ? cell * 1.12 : 0;
-  /* 圆角小于 1px 只剩抗锯齿的毛边，直接给直角 */
+  /* A radius under 1px leaves only anti-aliasing fuzz, so square corners cost less */
   const moduleRadius = cell >= 4 ? cell * o.style.moduleRadius : 0;
 
   let hole: HoleMetrics | null = null;
   if (o.hole) {
-    /* 取整到整格，四条边才落在模块缝上；
-       再给两侧各留 8 格，内容很短时也不会压到三个定位图案 */
+    /* Whole cells keep the four edges on module seams; 8 cells clear on each side keep a short
+       payload off the three finder patterns */
     const cap = Math.max(4, n - 16);
     const cols = Math.min(cap, Math.max(4, Math.round(total * o.hole.cols)));
     const rows = Math.min(cap, Math.max(4, Math.round(cols * o.hole.aspect)));
@@ -140,7 +140,7 @@ export function computeMetrics(o: RenderOptions): Metrics {
       h,
       cols,
       rows,
-      /* 留白上限是短边的一半减 1px，保证 logo 有地方落 */
+      /* Padding is capped at half the short side minus 1px so the logo still lands */
       pad: Math.max(0, Math.min(short * o.hole.padding, short / 2 - 1)),
       radius: Math.max(0, Math.min(short * o.hole.radius, short / 2)),
     };
@@ -172,7 +172,7 @@ function mix(a: string, b: string, t: number): string {
   return `rgb(${r},${g},${bl})`;
 }
 
-/** #rrggbb + alpha → rgba()，避免用 globalAlpha 影响后续绘制 */
+/** #rrggbb plus alpha to rgba(); avoids globalAlpha leaking into later draws */
 function withAlpha(hex: string, a: number): string {
   const v = parseInt(hex.slice(1), 16);
   return `rgba(${(v >> 16) & 255},${(v >> 8) & 255},${v & 255},${a.toFixed(3)})`;
@@ -192,11 +192,11 @@ function rr(
 }
 
 function inEye(r: number, c: number, n: number): boolean {
-  // 只挖 7×7 眼睛本体，眼睛外一圈分隔带留给字符层；drawEyes 最后绘制，越界字符会被覆盖
+  // Only the 7x7 eye bodies are skipped; the ring around them stays with the glyph layer. drawEyes runs last so overhanging glyphs get covered
   return (r < 7 && c < 7) || (r < 7 && c >= n - 7) || (r >= n - 7 && c < 7);
 }
 
-/** 每列的瀑布参数：条纹间距、拖尾长度、下落速度、相位、是否留空 */
+/** Per-column rain parameters: streak gap, tail length, fall speed, phase, mute flag */
 interface Col {
   gap: number;
   tail: number;
@@ -207,35 +207,35 @@ interface Col {
 }
 
 /**
- * 每列的瀑布参数。间距、拖尾、速度都以「画布宽度」为基准再换算成格数：
- * 同一块画布上，21×21 的码和 137×137 的码，瀑布的浓密程度和下落速度看起来一致。
+ * Per-column rain parameters. Gap, tail and speed are measured against the canvas width and then
+ * converted to cells, so a 21x21 symbol and a 137x137 one rain at the same density and fall speed.
  */
 function buildCols(n: number, cell: number, px: number): Col[] {
   const cols: Col[] = [];
   for (let c = 0; c < n; c++) {
-    /* 同列两条水流之间约 16%–27% 画布宽 */
+    /* About 16%-27% of the canvas width between two streaks in the same column */
     const gap = (px * (0.16 + noise2(c, 3.1) * 0.11)) / cell;
     cols.push({
       gap,
-      tail: gap * (0.86 + noise2(c, 7.7) * 0.16), // 拖尾接近间距，缝隙细一点
-      speed: (px * (0.24 + noise2(c, 11.3) * 0.35)) / cell, // 每秒下落 24%–59% 画布宽
+      tail: gap * (0.86 + noise2(c, 7.7) * 0.16), // tail just under the gap keeps the seams thin
+      speed: (px * (0.24 + noise2(c, 11.3) * 0.35)) / cell, // falls 24%-59% of the canvas width per second
       phase: noise2(c, 15.9) * gap,
-      mute: noise2(c, 21.5) < 0.07, // 少数列留空，透气
-      bias: 0.82 + noise2(c, 27.1) * 0.36, // 每列整体浓淡不同
+      mute: noise2(c, 21.5) < 0.07, // a few empty columns let the field breathe
+      bias: 0.82 + noise2(c, 27.1) * 0.36, // each column gets its own overall density
     });
   }
   return cols;
 }
 
 /**
- * 某格字符的亮度（0–1）。
- * 每列按 gap 均匀排布多个“头”，头以 speed 向下走，头上方 tail 格形成渐隐拖尾，
- * 所以整列几乎都亮但亮度有梯度 —— 这才是瀑布，而不是滴水。
+ * Brightness (0-1) of the character in one cell.
+ * Each column holds several heads spaced `gap` apart; a head travels down at `speed` and the
+ * `tail` cells above it fade out, so the column stays lit at a gradient.
  */
 function streak(col: Col, r: number, t: number): number {
   if (col.mute) return 0;
   const head = col.phase + col.speed * t;
-  const d = (((head - r) % col.gap) + col.gap) % col.gap; // 落后头多少格
+  const d = (((head - r) % col.gap) + col.gap) % col.gap; // cells behind the head
   if (d >= col.tail) return 0;
   return Math.pow(1 - d / col.tail, 1.9);
 }
@@ -253,7 +253,7 @@ function drawEyes(
     [0, n - 7],
     [n - 7, 0],
   ];
-  /* 格子很小时线宽会掉到 1px 以下，只剩一条抗锯齿灰带 */
+  /* Small cells drop the stroke under 1px and leave only an anti-aliased grey band */
   const lw = Math.max(1, cell * 1.1);
   ctx.save();
   ctx.globalAlpha = alpha;
@@ -295,7 +295,7 @@ function drawLogo(
   rr(ctx, hole.x, hole.y, hole.w, hole.h, hole.radius);
   ctx.fill();
 
-  /* 等比放进挖空区、居中，四周留 pad 呼吸边：不拉伸、不裁切 */
+  /* Fit into the hole centred with pad of breathing room on every side; no stretching, no cropping */
   const aw = Math.max(0, hole.w - hole.pad * 2);
   const ah = Math.max(0, hole.h - hole.pad * 2);
   const ratio = o.logoRatio > 0 ? o.logoRatio : 1;
@@ -364,7 +364,7 @@ export function drawFrame(
       const cx = (c + quiet + 0.5) * cell;
       const cy = (r + quiet + 0.5) * cell;
 
-      /* 波前顺序：中心向外 or 自上而下 */
+      /* Wave front order: from the centre outwards or from the top down */
       const nx = (c + quiet) / total;
       const ny = (r + quiet) / total;
       const dist =
@@ -374,19 +374,19 @@ export function drawFrame(
       const d = clamp(dist + noise2(c, r) * 0.08);
       const p1 = frozen ? 1 : clamp((t - (rain + d * span)) / tCell);
 
-      /* ---- 字符层 ---- */
+      /* ---- glyph layer ---- */
       if (p1 < 1) {
         const col = cols[c];
         const b = streak(col, r, t);
         const holeNoise = noise2(c * 1.7 + 0.3, r * 2.3 + 0.7);
         if (b > 0.04 && holeNoise > 0.08) {
           const flick = 0.9 + 0.1 * noise2(c + tick, r);
-          /* 字符在 p1 0→0.44 之间溶掉，模块同时浮现，两者重叠不留空档 */
+          /* Glyphs dissolve over p1 0 to 0.44 while modules surface, so the two overlap without a gap */
           const fade = 1 - smooth(0, 0.44, p1);
-          /* 下限 0.22 保证“墙”是实的，不散成灰点；上限 1 让水头压得住 */
+          /* Floor 0.22 keeps the wall solid instead of grey dots; cap 1 keeps the head at full strength */
           const a = clamp((0.22 + 0.8 * b) * flick * col.bias * fade);
           if (a > 0.015) {
-            /* 极轻微抖动，破掉铅字般的网格感 */
+            /* A slight jitter breaks the set-grid look */
             const jx = (noise2(c * 3.1, r * 5.7 + tick) - 0.5) * cell * 0.12;
             const jy = (noise2(c * 7.3 + tick, r * 9.1) - 0.5) * cell * 0.1;
             ctx.fillStyle =
@@ -399,7 +399,7 @@ export function drawFrame(
               const idx = Math.floor(hh * CHARS.length) % CHARS.length;
               ctx.fillText(CHARS[idx], cx + jx, cy + jy);
             } else {
-              /* 格子已经比字号还小：画点，保留瀑布的流向，不硬塞认不出的字符 */
+              /* Cells are smaller than the font, so draw dots and keep the flow instead of forcing unreadable glyphs */
               ctx.beginPath();
               ctx.arc(
                 cx + jx * 0.4,
@@ -417,7 +417,7 @@ export function drawFrame(
       if (!o.matrix.cells[r * n + c]) continue;
       if (p1 <= 0) continue;
 
-      /* ---- 模块层：直接以成品尺寸浮现，不做“长大” —— 长了会像麻点 ---- */
+      /* ---- module layer: surfaces at final size, growing would read as speckle ---- */
       const size =
         cell * moduleScale * (0.94 + 0.06 * easeOut(clamp(p1 / 0.5)));
       const alpha = smooth(0, 0.34, p1);

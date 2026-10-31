@@ -12,7 +12,7 @@ import {
 } from "./render";
 
 const SIZE = 240;
-/* 每格不到 4px：字号与圆角都该被判为关掉 */
+/* Under 4px per cell both the glyph font and the module radius should be judged off */
 const SIZE_TINY = 100;
 const DPR = 2;
 const LOGO = { width: 64, height: 64 } as unknown as CanvasImageSource;
@@ -23,7 +23,7 @@ interface RecordedCall {
   fillStyle: string | CanvasGradient | CanvasPattern;
 }
 
-/** 记录每次调用的假 2D 上下文：属性赋值落在字段上，方法调用按顺序入栈 */
+/** Fake 2D context recording every call: property writes land on fields, method calls push in order */
 class RecordingContext {
   readonly calls: RecordedCall[] = [];
   fillStyle: string | CanvasGradient | CanvasPattern = "";
@@ -102,7 +102,7 @@ function target(ctx: RecordingContext = new RecordingContext()) {
   return { canvas: canvas as unknown as HTMLCanvasElement, ctx };
 }
 
-/** 没有 roundRect 的运行时：rr() 必须退回直角路径 */
+/** Runtime without roundRect: rr() must fall back to straight corners */
 class LegacyContext extends RecordingContext {
   constructor() {
     super();
@@ -176,7 +176,7 @@ describe("computeMetrics", () => {
 
     expect(hole.pad).toBeCloseTo(short / 2 - 1, 9);
     expect(hole.radius).toBeCloseTo(short / 2, 9);
-    /* 留白吃到上限，logo 仍有两个像素的落点 */
+    /* Padding hits its cap and the logo still gets two pixels */
     expect(hole.w - hole.pad * 2).toBeGreaterThan(0);
     expect(hole.h - hole.pad * 2).toBeGreaterThan(0);
   });
@@ -316,7 +316,7 @@ describe("drawFrame", () => {
     expect(h).toBeCloseTo(side, 9);
     expect(x).toBeCloseTo(hole.x + (hole.w - w) / 2, 9);
     expect(y).toBeCloseTo(hole.y + (hole.h - h) / 2, 9);
-    /* 挖空区先被纸色填掉，logo 才落在上面 */
+    /* The hole is filled with the paper colour first, then the logo goes on top */
     expect(
       callsOf(ctx, "fill").some(
         (call) => call.fillStyle === DEFAULT_STYLE.paper,
@@ -376,7 +376,7 @@ describe("drawFrame", () => {
 
     expect(callsOf(modern.ctx, "rect").length).toBe(0);
     expect(callsOf(legacy.ctx, "roundRect").length).toBe(0);
-    /* 同一批矩形全部改走 rect：只少一个圆角参数，几何不变 */
+    /* Every rect in the batch goes through rect(): only the corner radius argument differs, the geometry is unchanged */
     const squares = callsOf(legacy.ctx, "rect").map((call) =>
       (call.args as number[]).slice(0, 4),
     );
@@ -427,7 +427,7 @@ describe("drawFrame", () => {
     drawFrame(radial.canvas, options({ sweep: "radial" }), 1.6, DPR);
     drawFrame(down.canvas, options({ sweep: "down" }), 1.6, DPR);
 
-    /* fillText 的第二个坐标是 y：字符层只剩下方那截，说明波前是从上往下推的 */
+    /* The second fillText coordinate is y: only the lower glyphs remain, so the wave front moves downwards */
     const radialY = callsOf(radial.ctx, "fillText").map(
       (call) => call.args[2] as number,
     );
@@ -460,13 +460,13 @@ describe("drawFrame", () => {
       );
     expect(waves.length).toBeGreaterThan(1);
     expect(new Set(waves).size).toBeGreaterThan(1);
-    /* 色波只在 ink 与 accent 之间取值 */
+    /* The wave only takes values between ink and accent */
     expect(waves.every((style) => /^rgb\(\d+,\d+,\d+\)$/.test(style))).toBe(
       true,
     );
-    /* 同一帧画两遍完全一致：没有随机，也没有读时钟 */
+    /* Two draws of the same frame are identical: no randomness and no clock reads */
     expect(repeat.ctx.calls).toEqual(tinted.ctx.calls);
-    /* 符号沉完之前不打色波 */
+    /* No colour wave before the symbol settles */
     expect(early.ctx.calls).toEqual(monoEarly.ctx.calls);
   });
 });
